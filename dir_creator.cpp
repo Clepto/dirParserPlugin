@@ -1,6 +1,5 @@
 #include "dir_creator.h"
 #include <QDir>
-#include <QDebug>
 
 DirParser::DirParser(QQuickItem *parent)
     : QQuickItem(parent)
@@ -14,14 +13,27 @@ bool DirParser::createDirectory(const QString &name)
 }
 
 QStringList DirParser::fetchAllFiles(const QString &name){
-    QDir dir(name);
-    if(!dir.exists())
-        return QStringList("");
-    dir.setFilter(QDir::NoDotAndDotDot | QDir::Files);
+    QDir dir(name, QString(""), QDir::Unsorted, QDir::Files);
 
-    return dir.entryList();
+    QStringList entries = dir.entryList();
+
+    QString dir_absolute_path = dir.absolutePath();
+
+    short entries_count = entries.count();
+    for(short i=0;i<entries_count;i++)
+        entries.replace(i, dir_absolute_path+"/"+entries.at(i));
+    return entries;
 }
 
 bool DirParser::dirExists(const QString &name){
     return QDir(name).exists();
+}
+
+bool DirParser::removeDir(const QString &dirName){
+    QDir dir(dirName);
+    return dir.removeRecursively();
+}
+
+bool DirParser::remove(const QString &name){
+    return QFile(name).remove();
 }
